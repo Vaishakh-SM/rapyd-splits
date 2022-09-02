@@ -1,19 +1,27 @@
 from os import access
+from socket import socket
+from tkinter import Entry
 from fastapi import FastAPI, Form
 from .config import settings
 from starlette.middleware.cors import CORSMiddleware
-from pymongo import MongoClient
+from fastapi_socketio import SocketManager
 import motor.motor_asyncio
+import uuid
+import socketio
 
-app = FastAPI()
 client = motor.motor_asyncio.AsyncIOMotorClient(settings.mongodb_url)
 db = client.hackathon
 
+room_store = set()
+# REPLACE WITH REDIS/MONGO
+
+app = FastAPI()
+
 origins = [
-    "http://localhost",
-    "http://localhost:3000",
+    "http://localhost:5173", "http://localhost:3000", "http://localhost:3001"
 ]
 
+origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -22,17 +30,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# sio = SocketManager(app=app)
+# sio = socketio.AsyncServer(async_mode='asgi')
+sio = socketio.Server()
+
 
 @app.post("/api/generate")
-async def authorize_mediavalet(e_wallet: str = Form(), amount: str = Form()):
+async def generate_url(e_wallet: str, amount: str):
 
-    print(f"FAf: {e_wallet}")
+    entry = {"wallet_id": e_wallet, "amount": amount}
 
-    trial_json = {"wallet_id": "afasfasfaf"}
+    new_transaction = await db["transactions"].insert_one(entry)
 
-    new_student = await db["transactions"].insert_one(trial_json)
-    created_student = await db["transactions"].find_one(
-        {"_id": new_student.inserted_id})
+    # See what to return
+    return new_transaction.inserted_id
 
-    print(created_student)
-    print(f"New student is {new_student}, type: {type(new_student)}")
+
+@app.post("/api/initiate")
+async def initiate_group_payment(e_wallet: str, amount: str):
+    pass
+
+
+@sio.on('c')
+async def create_room(sid, *args, **kwargs):
+
+    print("Creatinf room")
+    room_id = uuid.uuid1()
+
+    while room_id not in room_store:
+        room_id = uuid.uuid1()
+
+    sio.enter_room(sid, room_id)
+
+    print("Emitted create-room-success")
+    await sio.emit('create-room-success', room_id)
+
+
+# Create socket kinda thing (private room)
