@@ -7,7 +7,7 @@ const ENDPOINT = "http://127.0.0.1:4001";
 
 if (ENDPOINT === null) console.log("Set your network endpoint in socket.js");
 
-let socket: any = socketIOClient(ENDPOINT);
+export let socket = socketIOClient(ENDPOINT);
 
 export function createRoom() {
   console.log("Socket is: ", socket);
@@ -16,7 +16,6 @@ export function createRoom() {
   socket.once("create-room-success", (roomId: string) => {
     localStorage.setItem("roomId", roomId);
     console.log("CREATED:", roomId);
-    socket.roomId = roomId;
 
     // setRoomId(socket.roomId);
     // socket.emit("host-fetch-components");
@@ -31,9 +30,17 @@ export function joinRoom(roomId: string) {
   socket.once("join-room-success", (roomId: string) => {
     localStorage.setItem("roomId", roomId);
     console.log("JOINED:", roomId);
-    socket.roomId = roomId;
 
     // setRoomId(socket.roomId);
     // socket.emit("host-fetch-components");
+  });
+}
+
+export function joinListener(ev?: () => void) {
+  socket.on("new-join", (roomId: string) => {
+    console.log("Someone joined the room", roomId);
+	if (ev) {
+		ev()
+	}
   });
 }

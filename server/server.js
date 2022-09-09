@@ -1,13 +1,39 @@
-const http = require("http");
-const socketIo = require("socket.io");
+require('dotenv').config({ path: './config.env' });
+
+const express = require("express");
+const cors = require("cors");
+const {Server} = require("socket.io")
+
+const dbo = require('./db/conn')
+const http = require('http')
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(require('./routes/group_payments'))
+
+const server = http.createServer(app);
 
 const port = process.env.PORT || 4001;
 
-const crypto = require("crypto");
-const server = http.createServer();
+const crypto = require("crypto")
 
-const io = socketIo(server, {
-  cors: { origin: "*" },
+// const io = socketIo(server, {
+//   cors: { origin: "*" },
+// });
+const io = new Server(server)
+
+// perform a database connection when the server starts
+dbo.connectToServer(function (err) {
+  if (err) {
+    console.error(err);
+    process.exit();
+  }
+
+  // start the Express server
+  // app.listen(port, () => {
+  //   console.log(`Server is running on port: ${port}`);
+  // });
 });
 
 const roomStore = new Set();
