@@ -6,9 +6,10 @@ const MongoStore = require("connect-mongo");
 const { Server } = require("socket.io");
 const dbo = require("./db/conn");
 const http = require("http");
+const crypto = require("crypto");
+
 const app = express();
 const server = http.createServer(app);
-const crypto = require("crypto");
 const io = new Server(server);
 const port = process.env.PORT || 4001;
 
@@ -16,18 +17,14 @@ var passport = require("passport");
 var session = require("express-session");
 var authRouter = require("./routes/auth");
 
-// const io = socketIo(server, {
-//   cors: { origin: "*" },
-// });
-
 app.use(cors());
 app.use(express.json());
 app.use(
   session({
     cookie: {
-      maxAge: 6000 * 5, // see below
+      maxAge: 6000 * 60, // 60 minutes
     },
-    secret: "Patti sinan",
+    secret: process.env.SESSION_SECRET,
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URL,
       collectionName: "sessions",
@@ -36,16 +33,10 @@ app.use(
 );
 
 app.use(require("./routes/group_payments"));
-// app.use(passport.authenticate("session"));
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/", authRouter);
-
-app.get(
-  "/auth/github",
-  passport.authenticate("github", { scope: ["user:email"] })
-);
 
 // perform a database connection when the server starts
 dbo.connectToServer(function (err) {
@@ -53,11 +44,10 @@ dbo.connectToServer(function (err) {
     console.error(err);
     process.exit();
   }
+});
 
-  // start the Express server
-  // app.listen(port, () => {
-  //   console.log(`Server is running on port: ${port}`);
-  // });
+app.get("/", (req, res) => {
+  res.send("Hello");
 });
 
 app.get("/users", (req, res) => {
@@ -65,7 +55,7 @@ app.get("/users", (req, res) => {
     console.log("session not authenticated");
     return res.send("respond with a resource");
   }
-  console.log(req.session.passport.user);
+  console.log("User is ", req.user);
   return res.send("user" + req.session.passport.user);
 });
 

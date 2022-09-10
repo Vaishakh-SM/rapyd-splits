@@ -5,23 +5,40 @@ var GithubStrategy = require("passport-github");
 var createUser = require("../schemas/user");
 
 User = createUser(mongoose);
+mongoose.connect(process.env.MONGO_URL);
 
 passport.use(
   new GithubStrategy(
     {
       clientID: process.env["GITHUB_CLIENT"],
       clientSecret: process.env["GITHUB_SECRET"],
-      callbackURL: process.env["AUTH_REDIRECT"],
+      callbackURL: process.env.AUTH_REDIRECT,
       state: true,
     },
-    function verify(accessToken, refreshToken, profile, cb) {
-      console.log("Profile id is ", profile.id);
-
+    async function verify(accessToken, refreshToken, profile, cb) {
       user = {
         id: profile.id,
+        username: profile.username,
       };
 
-      cb(null, user);
+      try {
+        const userExists = await User.exists({ id: profile.id });
+        if (userExists) {
+          cb(null, user);
+        } else {
+          var newUser = new User({
+            id: profile.id,
+            username: profile.username,
+          });
+
+          newUser.save();
+
+          cb(null, user);
+        }
+      } catch (err) {
+        console.log("Errored during user querying", err);
+        cb(null, false);
+      }
     }
   )
 );
@@ -40,12 +57,15 @@ passport.deserializeUser(function (user, cb) {
 
 var router = express.Router();
 
-router.get("/login", function (req, res, next) {
-  //   res.render("login");
-  res.send("lol");
-});
+// router.get("/login", function (req, res, next) {
+//   //   res.render("login");
+//   res.send("lol");
+// });
 
-router.get("/login/federated/github", passport.authenticate("github"));
+router.get(
+  "/auth/github",
+  passport.authenticate("github", { scope: ["user:email"] })
+);
 
 router.get(
   "/auth/github/callback",

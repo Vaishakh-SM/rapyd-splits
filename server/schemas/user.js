@@ -1,6 +1,4 @@
-var util = require("util"),
-  Schema,
-  User;
+var Schema, User;
 
 module.exports = function (mongoose) {
   // Based on the dailyjs.com tutorial: Nodepad
@@ -14,15 +12,7 @@ module.exports = function (mongoose) {
         required: true,
         unique: true,
       },
-      email: {
-        type: String,
-        required: true,
-      },
-      password: {
-        type: String,
-        required: true,
-      },
-      firstName: String,
+      username: { type: String },
     }));
 
   // User.virtual('id').get(function() {
