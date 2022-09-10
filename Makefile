@@ -1,5 +1,5 @@
 start_server:
-	uvicorn app.main:app --port 3001 --reload
+	cd server && nodemon server
 
 start_frontend:
 	cd frontend && yarn dev
