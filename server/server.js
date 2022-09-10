@@ -1,27 +1,51 @@
-require('dotenv').config({ path: './config.env' });
+require("dotenv").config({ path: "./config.env" });
 
 const express = require("express");
 const cors = require("cors");
-const {Server} = require("socket.io")
-
-const dbo = require('./db/conn')
-const http = require('http')
-
+const MongoStore = require("connect-mongo");
+const { Server } = require("socket.io");
+const dbo = require("./db/conn");
+const http = require("http");
 const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(require('./routes/group_payments'))
-
 const server = http.createServer(app);
-
+const crypto = require("crypto");
+const io = new Server(server);
 const port = process.env.PORT || 4001;
 
-const crypto = require("crypto")
+var passport = require("passport");
+var session = require("express-session");
+var authRouter = require("./routes/auth");
 
 // const io = socketIo(server, {
 //   cors: { origin: "*" },
 // });
-const io = new Server(server)
+
+app.use(cors());
+app.use(express.json());
+app.use(
+  session({
+    cookie: {
+      maxAge: 6000 * 5, // see below
+    },
+    secret: "Patti sinan",
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URL,
+      collectionName: "sessions",
+    }),
+  })
+);
+
+app.use(require("./routes/group_payments"));
+// app.use(passport.authenticate("session"));
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use("/", authRouter);
+
+app.get(
+  "/auth/github",
+  passport.authenticate("github", { scope: ["user:email"] })
+);
 
 // perform a database connection when the server starts
 dbo.connectToServer(function (err) {
@@ -34,6 +58,15 @@ dbo.connectToServer(function (err) {
   // app.listen(port, () => {
   //   console.log(`Server is running on port: ${port}`);
   // });
+});
+
+app.get("/users", (req, res) => {
+  if (!req.session.passport || !req.session.passport.user) {
+    console.log("session not authenticated");
+    return res.send("respond with a resource");
+  }
+  console.log(req.session.passport.user);
+  return res.send("user" + req.session.passport.user);
 });
 
 const roomStore = new Set();

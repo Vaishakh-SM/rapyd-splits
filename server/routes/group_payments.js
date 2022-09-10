@@ -13,8 +13,8 @@ gpRoutes.route("/api").get(function (req, res) {
   res.status(200).send("Lmaoded it works");
 });
 
-// sample route for connecting to db
-gpRoutes.route("/api/getStuff").get(async function (_req, res) {
+//localhost:27017// sample route for connecting to db
+mongodb: gpRoutes.route("/api/getStuff").get(async function (_req, res) {
   const dbConnect = dbo.getDb();
 
   dbConnect
