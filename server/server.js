@@ -17,7 +17,9 @@ var passport = require("passport");
 var session = require("express-session");
 var authRouter = require("./routes/auth");
 
-app.use(cors());
+app.use(cors({
+	credentials: true
+}));
 app.use(express.json());
 app.use(
   session({
@@ -51,7 +53,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/users", (req, res) => {
-  if (!req.session.passport || !req.session.passport.user) {
+	console.log(req.user)
+  if (!req.session) {
     console.log("session not authenticated");
     return res.send("respond with a resource");
   }

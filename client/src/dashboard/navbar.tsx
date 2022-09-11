@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import {
   IconButton,
   Avatar,
@@ -34,6 +34,8 @@ import {
 } from "react-icons/fi";
 import { IconType } from "react-icons";
 import { ReactText } from "react";
+import { useEffectOnce } from "../utils/useEffectOnce";
+import request from "superagent";
 
 interface LinkItemProps {
   name: string;
@@ -53,6 +55,14 @@ export default function SidebarWithHeader({
   children: ReactNode;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  useEffect(() => {
+    request
+      .get('http://localhost:4001/users')
+      .withCredentials()
+      .then(res => {
+		console.log(res.body);
+      })
+  }, []);
   return (
     <Box minH="100vh" bg={useColorModeValue("gray.100", "gray.900")}>
       <SidebarContent

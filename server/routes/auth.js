@@ -16,6 +16,7 @@ passport.use(
       state: true,
     },
     async function verify(accessToken, refreshToken, profile, cb) {
+		
       user = {
         id: profile.id,
         username: profile.username,
@@ -70,7 +71,7 @@ router.get(
 router.get(
   "/auth/github/callback",
   passport.authenticate("github", {
-    successReturnToOrRedirect: "/",
+    successReturnToOrRedirect: process.env.NODE_ENV === "development" ? "http://localhost:5173/dashboard" : "/",
     failureRedirect: "/login",
   })
 );

@@ -18,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { GitHub } from "react-feather";
+import { useNavigate } from "react-router-dom";
 
 const NavLink = ({ children }: { children: ReactNode }) => (
   <Link
@@ -37,6 +38,7 @@ const NavLink = ({ children }: { children: ReactNode }) => (
 export default function Nav() {
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  let navigate = useNavigate();
   return (
     <>
       <Box px={4}>
@@ -49,10 +51,16 @@ export default function Nav() {
                 {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
               </Button>
 
-              <Button colorScheme={"green"} bg={"green.400"}>
+              <Button
+                colorScheme={"green"}
+                bg={"green.400"}
+                onClick={() => {
+                  window.location.href = "http://127.0.0.1:4001/auth/github";
+                }}
+              >
                 <Box mr={2}>
-					<GitHub  />
-				</Box>
+                  <GitHub />
+                </Box>
                 Sign In with Github
               </Button>
             </Stack>
