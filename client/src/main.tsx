@@ -9,6 +9,7 @@ import { ToastContainer } from "react-toastify";
 import { Website } from "./website";
 import theme from "./utils/theme";
 import { Dashboard } from "./dashboard";
+import { Room } from "./room";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -17,8 +18,8 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       <ToastContainer />
       <BrowserRouter>
         <Routes>
-          <Route path="/room/:roomId" element={<App />} />
-          <Route path="/room" element={<App />} />
+          <Route path="/room/:roomId" element={<Room />} />
+          <Route path="/room" element={<Room />} />
           <Route path="/" element={<Website />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
