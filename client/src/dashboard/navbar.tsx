@@ -58,7 +58,7 @@ export default function SidebarWithHeader({
   useEffectOnce(() => {
     request
       .get("http://localhost:4001/users")
-      .withCredentials()
+      .set({ Authorization: "Bearer " + window.localStorage.getItem("token") })
       .then((res) => {
         console.log(res);
       });

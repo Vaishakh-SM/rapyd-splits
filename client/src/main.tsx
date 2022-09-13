@@ -9,6 +9,7 @@ import { ToastContainer } from "react-toastify";
 import { Website } from "./website";
 import theme from "./utils/theme";
 import { Dashboard } from "./dashboard";
+import "./config/firebase-config";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

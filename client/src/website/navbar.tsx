@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import {
   Box,
   Flex,
@@ -19,6 +19,8 @@ import {
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { GitHub } from "react-feather";
 import { useNavigate } from "react-router-dom";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
 
 const NavLink = ({ children }: { children: ReactNode }) => (
   <Link
@@ -39,6 +41,19 @@ export default function Nav() {
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
   let navigate = useNavigate();
+
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged((userCred) => {
+      if (userCred) {
+        window.localStorage.setItem("auth", "true");
+
+        userCred.getIdToken().then((token) => {
+          window.localStorage.setItem("token", token);
+        });
+      }
+    });
+  }, []);
+
   return (
     <>
       <Box px={4}>
@@ -55,13 +70,21 @@ export default function Nav() {
                 colorScheme={"green"}
                 bg={"green.400"}
                 onClick={() => {
-                  window.location.href = "http://127.0.0.1:4001/auth/github";
+                  // window.location.href = "http://127.0.0.1:4001/auth/github";
+                  firebase
+                    .auth()
+                    .signInWithPopup(new firebase.auth.GoogleAuthProvider())
+                    .then((userCred) => {
+                      if (userCred) {
+                        console.log("Creds are ", userCred);
+                      }
+                    });
                 }}
               >
                 <Box mr={2}>
                   <GitHub />
                 </Box>
-                Sign In with Github
+                Sign In with Google
               </Button>
             </Stack>
           </Flex>
