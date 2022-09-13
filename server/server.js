@@ -7,39 +7,134 @@ const { Server } = require("socket.io");
 const dbo = require("./db/conn");
 const http = require("http");
 const crypto = require("crypto");
+const mongoose = require("mongoose");
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+
 const port = process.env.PORT || 4001;
 
-var passport = require("passport");
 var session = require("express-session");
-var authRouter = require("./routes/auth");
+var cookieSession = require("cookie-session");
+var createUser = require("./schemas/user");
+var GithubStrategy = require("passport-github2");
+var passport = require("passport");
 
-app.use(cors({
-	credentials: true
-}));
-app.use(express.json());
+const app = express();
+app.use(
+  cors({ origin: "http://localhost:5173", credentials: true, methods: ["*"] })
+);
+
+app.use(cookieParser("foo"));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(
   session({
     cookie: {
-      maxAge: 6000 * 60, // 60 minutes
+      maxAge: 6000 * 120,
+      secure: false,
+      // 60 minutes
     },
-    secret: process.env.SESSION_SECRET,
+    secret: "foo",
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URL,
       collectionName: "sessions",
     }),
+    saveUninitialized: false,
+    resave: false,
   })
 );
+
+// app.use(
+//   cookieSession({
+//     name: "session",
+//     maxAge: 6000 * 60,
+//     keys: ["foo"],
+//   })
+// );
 
 app.use(require("./routes/group_payments"));
 app.use(passport.initialize());
 app.use(passport.session());
 
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+User = createUser(mongoose);
+
+passport.use(
+  new GithubStrategy(
+    {
+      clientID: process.env["GITHUB_CLIENT"],
+      clientSecret: process.env["GITHUB_SECRET"],
+      callbackURL: process.env.AUTH_REDIRECT,
+      state: true,
+    },
+    async function verify(accessToken, refreshToken, profile, cb) {
+      user = {
+        id: profile.id,
+        username: profile.username,
+      };
+
+      try {
+        const userExists = await User.exists({ id: profile.id });
+        if (userExists) {
+          cb(null, user);
+        } else {
+          var newUser = new User({
+            id: profile.id,
+            username: profile.username,
+          });
+
+          newUser.save();
+
+          cb(null, user);
+        }
+      } catch (err) {
+        console.log("Errored during user querying", err);
+        cb(null, false);
+      }
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  console.log("Serialized with gtihub id: ", user.id);
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  console.log("Desialised Id is ", id);
+  User.findOne({ id: id }, (err, user) => {
+    if (err) {
+      console.log("Errored out in deserialization", err);
+
+      done(null, false, { error: err });
+    } else {
+      console.log("Deserialized user is ", user);
+      done(null, user);
+    }
+  });
+});
+
+// app.use(function (req, res, next) {
+//   res.locals.user = req.user;
+//   next();
+// });
+
+var authRouter = require("./routes/auth");
 app.use("/", authRouter);
 
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["*"],
+  },
+});
 // perform a database connection when the server starts
 dbo.connectToServer(function (err) {
   if (err) {
@@ -53,13 +148,14 @@ app.get("/", (req, res) => {
 });
 
 app.get("/users", (req, res) => {
-	console.log(req.user)
-  if (!req.session) {
-    console.log("session not authenticated");
-    return res.send("respond with a resource");
+  if (req.isAuthenticated()) {
+    console.log("req is ", req);
+    console.log("User is ", req.user);
+
+    return res.send(req.user);
   }
-  console.log("User is ", req.user);
-  return res.send("user" + req.session.passport.user);
+  console.log("session not authenticated");
+  return res.send("respond with a resource");
 });
 
 const roomStore = new Set();
@@ -99,7 +195,7 @@ function onJoinRoom(socket) {
 }
 
 io.on("connection", (socket) => {
-  console.log(socket.id + " connected ");
+  // console.log(socket.id + " connected ");
 
   onCreateRoom(socket);
 
