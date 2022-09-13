@@ -10,6 +10,7 @@
     "prepare": "cd ../ && husky install server/.husky"
   },
   "dependencies": {
+    "@types/express": "^4.17.13",
     "@types/mongodb": "^4.0.7",
     "body-parser": "^1.20.0",
     "connect-mongo": "^4.6.0",
@@ -19,6 +20,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.3",
+    "firebase-admin": "^11.0.1",
     "mongodb": "^3.7.3",
     "mongoose": "^6.6.0",
     "passport": "0.5",
