@@ -15,12 +15,6 @@ const { checkIfAuthenticated } = require("./middleware/middleware.js");
 
 const port = process.env.PORT || 4001;
 
-var session = require("express-session");
-var cookieSession = require("cookie-session");
-var createUser = require("./schemas/user");
-var GithubStrategy = require("passport-github2");
-var passport = require("passport");
-
 const app = express();
 app.use(
   cors({ origin: "http://localhost:5173", credentials: true, methods: ["*"] })
@@ -97,7 +91,7 @@ function onJoinRoom(socket) {
 }
 
 io.on("connection", (socket) => {
-  // console.log(socket.id + " connected ");
+  console.log(socket.id + " connected ");
 
   onCreateRoom(socket);
 
