@@ -11,6 +11,9 @@ import bodyParser from "body-parser";
 import { checkIfAuthenticated } from "./middleware/middleware.js";
 import { AuthenticatedRequest } from "src/types/req";
 import admin from "./config/firebase-config";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 const port = process.env.PORT || 4001;
 
@@ -31,11 +34,14 @@ const io = new Server(server, {
   },
 });
 // perform a database connection when the server starts
-connectToServer(function (err: any) {
-  if (err) {
-    console.error(err);
-    process.exit();
-  }
+prisma.$connect();
+
+process.on("SIGTERM", () => {
+  console.log("SIGTERM signal received: closing HTTP server");
+  prisma.$disconnect();
+  server.close(() => {
+    console.log("HTTP server closed");
+  });
 });
 
 app.get("/", (req, res) => {
@@ -51,6 +57,15 @@ app.get(
     res.send(profile);
   }
 );
+
+app.get("/create", async (req, res) => {
+  const user = await prisma.user.create({
+    data: {
+      uid: crypto.randomBytes(16).toString("hex").substring(0, 8),
+    },
+  });
+  res.send(user);
+});
 
 const roomStore = new Set();
 
