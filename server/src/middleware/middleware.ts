@@ -1,13 +1,15 @@
-const { NextFunction, Request, Response } = require("express");
+import { NextFunction, Request, Response } from "express";
+import { Middleware } from "src/types/middleware";
+import { AuthenticatedRequest } from "src/types/req";
 
-const admin = require("../config/firebase-config");
+import admin from "../config/firebase-config";
 
 // export interface IGetAuthTokenRequest extends Request {
 //   authToken: string;
 //   authId: string;
 // }
 
-const getAuthToken = (req, res, next) => {
+const getAuthToken: Middleware = (req, res, next) => {
   if (
     req.headers.authorization &&
     req.headers.authorization.split(" ")[0] === "Bearer"
@@ -19,11 +21,11 @@ const getAuthToken = (req, res, next) => {
   next();
 };
 
-const checkIfAuthenticated = (req, res, next) => {
+export const checkIfAuthenticated: Middleware = (req, res, next) => {
   getAuthToken(req, res, async () => {
     try {
       const { authToken } = req;
-      const userInfo = await admin.auth().verifyIdToken(authToken);
+      const userInfo = await admin.auth().verifyIdToken(authToken ?? "");
       req.authId = userInfo.uid;
       return next();
     } catch (e) {
@@ -34,10 +36,10 @@ const checkIfAuthenticated = (req, res, next) => {
   });
 };
 
-const checkIfAdmin = (req, res, next) => {
+export const checkIfAdmin: Middleware = (req, res, next) => {
   getAuthToken(req, res, async () => {
     try {
-      const userInfo = await admin.auth().verifyIdToken(req.authToken);
+      const userInfo = await admin.auth().verifyIdToken(req.authToken ?? "");
       if (userInfo.admin === true) {
         req.authId = userInfo.uid;
         return next();
@@ -48,9 +50,4 @@ const checkIfAdmin = (req, res, next) => {
         .send({ error: "You are not authorized to make this request" });
     }
   });
-};
-
-module.exports = {
-  checkIfAuthenticated: checkIfAuthenticated,
-  checkIfAdmin: checkIfAdmin,
 };

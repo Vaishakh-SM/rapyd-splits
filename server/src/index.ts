@@ -1,17 +1,16 @@
-require("dotenv").config({ path: "./config.env" });
+import "dotenv/config";
 
-const express = require("express");
-const cors = require("cors");
-const MongoStore = require("connect-mongo");
-const { Server } = require("socket.io");
-const dbo = require("./db/conn");
-const http = require("http");
-const crypto = require("crypto");
-const mongoose = require("mongoose");
+import express, { Request } from "express";
+import cors from "cors";
+import { Server, Socket } from "socket.io";
+import { connectToServer } from "./db/conn";
+import http from "http";
+import crypto from "crypto";
 
-const cookieParser = require("cookie-parser");
-const bodyParser = require("body-parser");
-const { checkIfAuthenticated } = require("./middleware/middleware.js");
+import bodyParser from "body-parser";
+import { checkIfAuthenticated } from "./middleware/middleware.js";
+import { AuthenticatedRequest } from "src/types/req";
+import admin from "./config/firebase-config";
 
 const port = process.env.PORT || 4001;
 
@@ -20,14 +19,8 @@ app.use(
   cors({ origin: "http://localhost:5173", credentials: true, methods: ["*"] })
 );
 
-app.use(cookieParser("foo"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-app.use(require("./routes/group_payments"));
-
-var authRouter = require("./routes/auth");
-app.use("/", authRouter);
 
 const server = http.createServer(app);
 
@@ -38,7 +31,7 @@ const io = new Server(server, {
   },
 });
 // perform a database connection when the server starts
-dbo.connectToServer(function (err) {
+connectToServer(function (err: any) {
   if (err) {
     console.error(err);
     process.exit();
@@ -49,14 +42,19 @@ app.get("/", (req, res) => {
   res.send("Hello");
 });
 
-app.get("/users", checkIfAuthenticated, (req, res) => {
-  console.log("Req auth id is ", req.authId);
-  res.send("Done!");
-});
+app.get(
+  "/users",
+  checkIfAuthenticated,
+  async (req: AuthenticatedRequest, res) => {
+    console.log("Req auth id is ", req.authId);
+    let profile = await admin.auth().getUser(req?.authId ?? "");
+    res.send(profile);
+  }
+);
 
 const roomStore = new Set();
 
-function onCreateRoom(socket) {
+function onCreateRoom(socket: Socket) {
   socket.on("create-room", () => {
     let roomId = crypto.randomBytes(16).toString("hex").substring(0, 8);
 
@@ -71,7 +69,7 @@ function onCreateRoom(socket) {
   });
 }
 
-function onJoinRoom(socket) {
+function onJoinRoom(socket: Socket) {
   socket.on("join-room", (roomId) => {
     console.log("Room id: ", roomId, "Room store ", roomStore);
     console.log("Roomstore has", roomStore.has(roomId));

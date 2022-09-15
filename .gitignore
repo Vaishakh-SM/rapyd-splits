@@ -2,3 +2,4 @@
 *.env
 *.husky
 serviceAccountKey.json
+server/dist
