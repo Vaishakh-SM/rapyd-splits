@@ -11,7 +11,7 @@ import theme from "./utils/theme";
 import { Dashboard } from "./dashboard";
 import "./config/firebase-config";
 
-import { Room } from "./room";
+import { Room } from "./room/room";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

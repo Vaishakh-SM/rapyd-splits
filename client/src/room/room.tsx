@@ -10,6 +10,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { CheckCircle, DollarSign } from "react-feather";
+import { useParams } from "react-router-dom";
 
 const res = {
   total: 100,
@@ -33,6 +34,8 @@ const res = {
 };
 
 export function Room() {
+  const params = useParams();
+
   return (
     <Box m={10}>
       <Stack align={"center"} my={5}>
@@ -49,7 +52,9 @@ export function Room() {
           <UserCard user={user} currency={res.currency} />
         ))}
 
-        <Button width="100%" colorScheme={"green"}>Initate Payment</Button>
+        <Button width="100%" colorScheme={"green"}>
+          Initate Payment
+        </Button>
       </VStack>
     </Box>
   );
