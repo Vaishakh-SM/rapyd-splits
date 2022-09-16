@@ -9,6 +9,8 @@ import { ToastContainer } from "react-toastify";
 import { Website } from "./website";
 import theme from "./utils/theme";
 import { Dashboard } from "./dashboard";
+import "./config/firebase-config";
+
 import { Room } from "./room";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

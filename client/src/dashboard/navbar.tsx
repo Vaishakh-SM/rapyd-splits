@@ -55,14 +55,14 @@ export default function SidebarWithHeader({
   children: ReactNode;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  useEffect(() => {
+  useEffectOnce(() => {
     request
-      .get('http://localhost:4001/users')
-      .withCredentials()
-      .then(res => {
-		console.log(res.body);
-      })
-  }, []);
+      .get("http://localhost:4001/users")
+      .set({ Authorization: "Bearer " + window.localStorage.getItem("token") })
+      .then((res) => {
+        console.log(res);
+      });
+  });
   return (
     <Box minH="100vh" bg={useColorModeValue("gray.100", "gray.900")}>
       <SidebarContent
