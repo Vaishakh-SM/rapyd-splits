@@ -11,7 +11,28 @@ datasource db {
 }
 
 model User {
-	id       String    @id @default(auto()) @map("_id") @db.ObjectId
-	e_wallet String[]
-	uid String @unique
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  eWallet      String[]
+  uid          String   @unique
+  Room         Room[]
+  redirectUrls String[]
+
+  @@index([id, uid])
+}
+
+model Room {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  eWallet       String
+  amount        Float
+  user          User     @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  status        Status
+  userId        String   @db.ObjectId
+  transactionId String?  @unique
+}
+
+enum Status {
+  PENDING
+  COMPLETED
+  FAILED
 }
