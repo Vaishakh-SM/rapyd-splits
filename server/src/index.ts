@@ -10,7 +10,8 @@ import { checkIfAuthenticated } from "./middleware/middleware.js";
 import { AuthenticatedRequest } from "src/types/req";
 import admin from "./config/firebase-config";
 import prisma from "./db/prisma";
-import createRoute from "./routes/auth";
+import roomRoute from "./routes/room";
+import authRoute from "./routes/auth";
 
 const port = process.env.PORT || 4001;
 
@@ -32,30 +33,11 @@ process.on("SIGTERM", () => {
   });
 });
 
-app.use("/create", createRoute);
+app.use("/api/room", roomRoute);
+app.use("/api/auth", authRoute);
 
 app.get("/", (req, res) => {
   res.send("Hello");
 });
-
-app.get(
-  "/users",
-  checkIfAuthenticated,
-  async (req: AuthenticatedRequest, res) => {
-    console.log("Req auth id is ", req.authId);
-    let profile = await admin.auth().getUser(req?.authId ?? "");
-    res.send(profile);
-  }
-);
-
-app.get("/create", async (req, res) => {
-  const user = await prisma.user.create({
-    data: {
-      uid: crypto.randomBytes(16).toString("hex").substring(0, 8),
-    },
-  });
-  res.send(user);
-});
-
 
 server.listen(port, () => console.log(`Listening on port ${port}`));

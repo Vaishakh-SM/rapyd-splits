@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import prisma from "../db/prisma";
 import { Middleware } from "src/types/middleware";
 import { AuthenticatedRequest } from "src/types/req";
 
@@ -26,7 +27,7 @@ export const checkIfAuthenticated: Middleware = (req, res, next) => {
     try {
       const { authToken } = req;
       const userInfo = await admin.auth().verifyIdToken(authToken ?? "");
-      req.authId = userInfo.uid;
+      req.userId = userInfo.uid;
       return next();
     } catch (e) {
       return res
@@ -36,12 +37,24 @@ export const checkIfAuthenticated: Middleware = (req, res, next) => {
   });
 };
 
+export const checkIfRegisteredUser: Middleware = async (req, res, next) => {
+  const profile = await prisma.user.findUnique({
+    where: { uid: req.userId },
+  });
+
+  if (profile === null) {
+    return res.status(401).send({ error: "You are not registered" });
+  } else {
+    next();
+  }
+};
+
 export const checkIfAdmin: Middleware = (req, res, next) => {
   getAuthToken(req, res, async () => {
     try {
       const userInfo = await admin.auth().verifyIdToken(req.authToken ?? "");
       if (userInfo.admin === true) {
-        req.authId = userInfo.uid;
+        req.userId = userInfo.uid;
         return next();
       }
     } catch (e) {

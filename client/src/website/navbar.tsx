@@ -21,6 +21,7 @@ import { GitHub } from "react-feather";
 import { useNavigate } from "react-router-dom";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
+import request from "superagent";
 
 const NavLink = ({ children }: { children: ReactNode }) => (
   <Link
@@ -45,10 +46,20 @@ export default function Nav() {
   useEffect(() => {
     firebase.auth().onAuthStateChanged((userCred) => {
       if (userCred) {
+        // Make a call to signin here
         window.localStorage.setItem("auth", "true");
 
         userCred.getIdToken().then((token) => {
           window.localStorage.setItem("token", token);
+          request
+            .get("http://localhost:4001/auth/signin")
+            .set({
+              Authorization: "Bearer " + window.localStorage.getItem("token"),
+            })
+            .then((res) => {
+              console.log("Successful login");
+              console.log(res);
+            });
         });
       }
     });
