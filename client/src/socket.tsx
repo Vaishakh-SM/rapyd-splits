@@ -23,9 +23,9 @@ export function createRoom() {
   });
 }
 
-export function joinRoom(roomId: string) {
+export function joinRoom(roomId: string, name: string) {
   console.log("Emmiting for room id ", roomId);
-  socket.emit("join-room", roomId);
+  socket.emit("join-room", { roomId: roomId, name: name });
 
   socket.once("join-room-success", (roomId: string) => {
     localStorage.setItem("roomId", roomId);
@@ -39,8 +39,19 @@ export function joinRoom(roomId: string) {
 export function joinListener(ev?: () => void) {
   socket.on("new-join", (roomId: string) => {
     console.log("Someone joined the room", roomId);
-	if (ev) {
-		ev()
-	}
+    if (ev) {
+      ev();
+    }
+  });
+}
+
+export function updateListener(setRoom: (roomState: any) => void) {
+  socket.on("update-room", (roomState) => {
+    let roomStateUpdate = [];
+    for (let i of Object.keys(roomState)) {
+      roomStateUpdate.push(roomState[i]);
+    }
+    console.log(roomStateUpdate);
+    setRoom(roomStateUpdate);
   });
 }

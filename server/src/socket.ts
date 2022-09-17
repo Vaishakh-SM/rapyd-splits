@@ -4,8 +4,8 @@ import crypto from "crypto";
 import prisma from "./db/prisma";
 
 export default function useSocketPath(server: http.Server) {
-  const roomStore = new Set();
-  const userStore = new Map();
+  const roomStore = new Map<string, { [key: string]: any }>();
+  const userRoom = new Map();
 
   const io = new Server(server, {
     cors: {
@@ -14,39 +14,62 @@ export default function useSocketPath(server: http.Server) {
     },
   });
 
-  function onCreateRoom(socket: Socket) {
-    socket.on("create-room", () => {
-      try {
-        let roomId = crypto.randomBytes(16).toString("hex").substring(0, 8);
+  // function onCreateRoom(socket: Socket) {
+  //   socket.on("create-room", () => {
+  //     try {
+  //       let roomId = crypto.randomBytes(16).toString("hex").substring(0, 8);
 
-        while (roomStore.has(roomId))
-          roomId = crypto.randomBytes(16).toString("hex").substring(0, 8);
+  //       while (roomStore.has(roomId))
+  //         roomId = crypto.randomBytes(16).toString("hex").substring(0, 8);
 
-        roomStore.add(roomId);
+  //       roomStore.add(roomId);
 
-        socket.join(roomId);
-        io.to(roomId).emit("create-room-success", roomId);
-      } catch (e) {
-        console.log("Error while creating room: ", e);
-        io.to(socket.id).emit("create-room-fail");
-      }
-    });
-  }
+  //       socket.join(roomId);
+  //       io.to(roomId).emit("create-room-success", roomId);
+  //     } catch (e) {
+  //       console.log("Error while creating room: ", e);
+  //       io.to(socket.id).emit("create-room-fail");
+  //     }
+  //   });
+  // }
 
   function onJoinRoom(socket: Socket) {
-    socket.on("join-room", (roomId) => {
+    socket.on("join-room", async ({ roomId, name }) => {
       try {
-        if (roomStore.has(roomId)) {
-          userStore.set(socket.id, { roomId: roomId, amount: "nan" });
+        const room = await prisma.room.findUnique({
+          where: { id: roomId },
+        });
+
+        if (room === null || room?.status !== "PENDING") {
+          io.to(socket.id).emit("join-room-fail", {
+            message: "Room does not exist or room has finished transaction",
+          });
+        } else {
+          let roomState = roomStore.get(roomId);
+          let nickname =
+            name + "#" + crypto.randomBytes(16).toString("hex").substring(0, 2);
+
+          if (roomState === undefined) {
+            roomState = {
+              [socket.id]: { nickname: nickname, amount: 0, ready: false },
+            };
+          } else {
+            roomState[socket.id] = {
+              nickname: nickname,
+              amount: 0,
+              ready: false,
+            };
+          }
+
+          roomStore.set(roomId, roomState);
+
+          userRoom.set(socket.id, roomId);
 
           io.to(socket.id).emit("join-room-success", roomId);
           socket.join(roomId);
 
           io.to(roomId).emit("new-join");
-        } else {
-          io.to(socket.id).emit("join-room-fail", {
-            message: "Room does not exist",
-          });
+          io.to(roomId).emit("update-room", roomStore.get(roomId));
         }
       } catch (e) {
         console.log("Error while joining room: ", e);
@@ -59,31 +82,44 @@ export default function useSocketPath(server: http.Server) {
 
   function onAmountChosen(socket: Socket) {
     socket.on("choose-amount", (amount) => {
-      let initialData = userStore.get(socket.id);
-      let newData = (initialData["amount"] = amount);
-      let roomId = userStore.get(socket.id)["roomId"];
-      userStore.set(socket.id, newData);
+      if (userRoom.has(socket.id)) {
+        let roomId = userRoom.get(socket.id);
+        let roomState = roomStore.get(roomId);
 
-      io.to(roomId).emit("amount-chosen", (socket.id, amount));
+        if (roomState !== undefined) {
+          roomState[socket.id]["amount"] = amount;
+          roomStore.set(roomId, roomState);
+        } else {
+          console.log("Error! Roomstate undefined in amount chosen");
+        }
+
+        io.to(roomId).emit("update-room", roomStore.get(roomId));
+      }
     });
   }
 
   function onConfirmed(socket: Socket) {
-    socket.on("confirm", (amount) => {
-      // Store this amount in DB and use it
+    socket.on("confirm", () => {
+      if (userRoom.has(socket.id)) {
+        let roomId = userRoom.get(socket.id);
+        let roomState = roomStore.get(roomId);
 
-      // if amount is -1 give error
+        if (roomState !== undefined) {
+          roomState[socket.id]["ready"] = false;
+          roomStore.set(roomId, roomState);
+        } else {
+          console.log("Error! Roomstate undefined in amount chosen");
+        }
 
-      let roomId = userStore.get(socket.id)["roomId"];
-
-      io.to(roomId).emit("confirmed", (socket.id, amount));
+        io.to(roomId).emit("update-room", roomStore.get(roomId));
+      }
     });
   }
 
   io.on("connection", (socket) => {
     console.log(socket.id + " connected ");
 
-    onCreateRoom(socket);
+    // onCreateRoom(socket);
 
     onJoinRoom(socket);
 

@@ -12,6 +12,7 @@ import admin from "./config/firebase-config";
 import prisma from "./db/prisma";
 import roomRoute from "./routes/room";
 import authRoute from "./routes/auth";
+import useSocketPath from "./socket.js";
 
 const port = process.env.PORT || 4001;
 
@@ -35,6 +36,7 @@ process.on("SIGTERM", () => {
 
 app.use("/api/room", roomRoute);
 app.use("/api/auth", authRoute);
+useSocketPath(server);
 
 app.get("/", (req, res) => {
   res.send("Hello");
