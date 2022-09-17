@@ -2,6 +2,7 @@ import { Express, Router } from "express";
 import prisma from "../db/prisma";
 import { AuthenticatedRequest } from "src/types/req";
 import { checkIfAuthenticated } from "../middleware/middleware";
+import admin from "../config/firebase-config";
 
 const router = Router();
 router.use(checkIfAuthenticated);
@@ -14,10 +15,8 @@ router.get("/signin", async (req: AuthenticatedRequest, res) => {
     console.log("profile is ", profile);
     if (profile === null) {
       await prisma.user.create({ data: { uid: req.userId as string } });
-      res.send({ uid: req.userId });
-    } else {
-      res.send({ uid: req.userId });
     }
+	res.send({"status": "success"});
   } catch (e) {
     console.log("Error during signin, profile finding/creation", e);
     res.send(e);

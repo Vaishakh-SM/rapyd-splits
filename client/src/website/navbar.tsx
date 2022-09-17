@@ -46,20 +46,12 @@ export default function Nav() {
   useEffect(() => {
     firebase.auth().onAuthStateChanged((userCred) => {
       if (userCred) {
-        // Make a call to signin here
         window.localStorage.setItem("auth", "true");
 
         userCred.getIdToken().then((token) => {
           window.localStorage.setItem("token", token);
-          request
-            .get("http://localhost:4001/auth/signin")
-            .set({
-              Authorization: "Bearer " + window.localStorage.getItem("token"),
-            })
-            .then((res) => {
-              console.log("Successful login");
-              console.log(res);
-            });
+		  navigate("/dashboard");
+        
         });
       }
     });
@@ -80,16 +72,12 @@ export default function Nav() {
               <Button
                 colorScheme={"green"}
                 bg={"green.400"}
-                onClick={() => {
+                onClick={async () => {
                   // window.location.href = "http://127.0.0.1:4001/auth/github";
-                  firebase
+                  const creds = await firebase
                     .auth()
-                    .signInWithPopup(new firebase.auth.GoogleAuthProvider())
-                    .then((userCred) => {
-                      if (userCred) {
-                        console.log("Creds are ", userCred);
-                      }
-                    });
+                    .signInWithPopup(new firebase.auth.GoogleAuthProvider());
+                  
                 }}
               >
                 <Box mr={2}>

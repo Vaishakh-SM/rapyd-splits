@@ -21,6 +21,7 @@ import {
   MenuDivider,
   MenuItem,
   MenuList,
+  Button,
 } from "@chakra-ui/react";
 import {
   FiHome,
@@ -36,33 +37,39 @@ import { IconType } from "react-icons";
 import { ReactText } from "react";
 import { useEffectOnce } from "../utils/useEffectOnce";
 import request from "superagent";
+import firebase from "firebase/compat/app";
+import { Link as ReactRouterLink } from "react-router-dom";
 
 interface LinkItemProps {
   name: string;
   icon: IconType;
+  link: string;
 }
 const LinkItems: Array<LinkItemProps> = [
-  { name: "Home", icon: FiHome },
-  { name: "Trending", icon: FiTrendingUp },
-  { name: "Explore", icon: FiCompass },
-  { name: "Favourites", icon: FiStar },
-  { name: "Settings", icon: FiSettings },
+  { name: "Home", icon: FiHome, link: "home" },
+  { name: "Integrate", icon: FiTrendingUp, link: "integrate" },
+  { name: "Explore", icon: FiCompass, link: "home" },
+  { name: "Favourites", icon: FiStar, link: "home" },
+  { name: "Settings", icon: FiSettings, link: "settings" },
 ];
 
 export default function SidebarWithHeader({
   children,
+  setLoading,
 }: {
   children: ReactNode;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  useEffectOnce(() => {
-    request
-      .get("http://localhost:4001/users")
-      .set({ Authorization: "Bearer " + window.localStorage.getItem("token") })
-      .then((res) => {
-        console.log(res);
-      });
-  });
+  const currentUser = firebase.auth().currentUser;
+  //   useEffectOnce(() => {
+  //     request
+  //       .get("http://localhost:4001/users")
+  //       .set({ Authorization: "Bearer " + window.localStorage.getItem("token") })
+  //       .then((res) => {
+  //         console.log(res);
+  //       });
+  //   });
   return (
     <Box minH="100vh" bg={useColorModeValue("gray.100", "gray.900")}>
       <SidebarContent
@@ -83,7 +90,11 @@ export default function SidebarWithHeader({
         </DrawerContent>
       </Drawer>
       {/* mobilenav */}
-      <MobileNav onOpen={onOpen} />
+      <MobileNav
+        onOpen={onOpen}
+        profile={currentUser!}
+        setLoading={setLoading}
+      />
       <Box ml={{ base: 0, md: 60 }} p="4">
         {children}
       </Box>
@@ -108,13 +119,15 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       {...rest}
     >
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-          Logo
-        </Text>
+        <Button variant={"ghost"} as={ReactRouterLink} to="/dashboard">
+			<Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
+			  Logo
+			</Text>
+		</Button>
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
+        <NavItem key={link.name} icon={link.icon} link={link.link}>
           {link.name}
         </NavItem>
       ))}
@@ -125,11 +138,13 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
 interface NavItemProps extends FlexProps {
   icon: IconType;
   children: ReactText;
+  link: string;
 }
-const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
+const NavItem = ({ icon, children, link, ...rest }: NavItemProps) => {
   return (
     <Link
-      href="#"
+      as={ReactRouterLink}
+      to={link}
       style={{ textDecoration: "none" }}
       _focus={{ boxShadow: "none" }}
     >
@@ -164,8 +179,10 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
 
 interface MobileProps extends FlexProps {
   onOpen: () => void;
+  profile?: firebase.User;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
-const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
+const MobileNav = ({ onOpen, profile, setLoading, ...rest }: MobileProps) => {
   return (
     <Flex
       ml={{ base: 0, md: 60 }}
@@ -212,9 +229,8 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               <HStack>
                 <Avatar
                   size={"sm"}
-                  src={
-                    "https://images.unsplash.com/photo-1619946794135-5bc917a27793?ixlib=rb-0.3.5&q=80&fm=jpg&crop=faces&fit=crop&h=200&w=200&s=b616b2c5b373a80ffc9636ba24f7a4a9"
-                  }
+                  referrerPolicy="no-referrer"
+                  src={profile?.photoURL ?? ""}
                 />
                 <VStack
                   display={{ base: "none", md: "flex" }}
@@ -222,7 +238,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                   spacing="1px"
                   ml="2"
                 >
-                  <Text fontSize="sm">Justina Clark</Text>
+                  <Text fontSize="sm">{profile?.displayName}</Text>
                   <Text fontSize="xs" color="gray.600">
                     Admin
                   </Text>
@@ -240,7 +256,15 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               <MenuItem>Settings</MenuItem>
               <MenuItem>Billing</MenuItem>
               <MenuDivider />
-              <MenuItem>Sign out</MenuItem>
+              <MenuItem
+                onClick={async () => {
+                  localStorage.removeItem("token");
+                  await firebase.auth().signOut();
+                  setLoading(true);
+                }}
+              >
+                Sign out
+              </MenuItem>
             </MenuList>
           </Menu>
         </Flex>
