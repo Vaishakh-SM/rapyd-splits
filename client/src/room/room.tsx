@@ -22,9 +22,12 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { CheckCircle, DollarSign } from "react-feather";
+import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
+import request from "superagent";
 import { joinRoom } from "../socket";
 import { updateListener } from "../socket";
+import { CardInput } from "./components/CardInput";
 
 // const res = {
 //   total: 100,
@@ -68,8 +71,20 @@ export function Room() {
     onOpen();
   }, []);
 
+  const { data, error, isLoading } = useQuery(
+    ["roomAmount", params.roomId],
+    () => {
+      return request
+        .get(`http://localhost:4001/api/room/${params.roomId}`)
+        .set({
+          Authorization: "Bearer " + window.localStorage.getItem("token"),
+        });
+    }
+  );
+
   return (
     <Box m={10}>
+      <CardInput callback={(cardNumber, cardName, cardExpiry, cardCvc) => {}} />
       <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
         <ModalContent>

@@ -17,7 +17,16 @@ import { joinRoom, createRoom, joinListener } from "../../socket";
 import { useEffectOnce } from "../../utils/useEffectOnce";
 import Card from "react-credit-cards-2";
 
-export function CardInput() {
+export function CardInput({
+  callback,
+}: {
+  callback: (
+    cardNumber: string,
+    cardName: string,
+    cardExpiry: string,
+    cardCvc: string
+  ) => void;
+}) {
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
@@ -134,7 +143,14 @@ export function CardInput() {
             />
           </FormControl>
         </HStack>
-        <Button width={"100%"}>Add</Button>
+        <Button
+          width={"100%"}
+          onClick={() => {
+            callback(cardNumber, cardName, cardExpiry, cardCvc);
+          }}
+        >
+          Add
+        </Button>
       </VStack>
       {/* <div className="card">
         <button

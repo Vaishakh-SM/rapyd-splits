@@ -49,4 +49,18 @@ router.get("/create", async (req: AuthenticatedRequest, res) => {
   }
 });
 
+router.get("/room/:roomid", async (req: AuthenticatedRequest, res) => {
+  const room = await prisma.room.findUnique({
+    where: { id: req.params.roomid },
+  });
+
+  if (room === null) {
+    return res.status(404).send({ error: "Room not found" });
+  }
+
+  res.send({
+	amound: room.amount,
+  });
+});
+
 export default router;
