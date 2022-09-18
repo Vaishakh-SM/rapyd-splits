@@ -1,14 +1,11 @@
 import "dotenv/config";
 
-import express, { Request, response } from "express";
+import express from "express";
 import cors from "cors";
 import http from "http";
-import crypto from "crypto";
 
 import bodyParser from "body-parser";
-import { checkIfAuthenticated } from "./middleware/middleware.js";
-import { AuthenticatedRequest } from "src/types/req";
-import admin from "./config/firebase-config";
+
 import prisma from "./db/prisma";
 import roomRoute from "./routes/room";
 import authRoute from "./routes/auth";
@@ -38,8 +35,15 @@ app.use("/api/room", roomRoute);
 app.use("/api/auth", authRoute);
 useSocketPath(server);
 
-app.get("/", (req, res) => {
-  res.send("Hello");
+// const root = "/home/vaishakh/Desktop/Projects/Rapyd/client/dist";
+const root = require("path").join(__dirname, "..", "..", "client", "dist");
+
+app.use(express.static(root));
+
+app.get("/*", (req, res) => {
+  res.sendFile(
+    require("path").join(__dirname, "..", "..", "client", "dist", "index.html")
+  );
 });
 
 server.listen(port, () => console.log(`Listening on port ${port}`));

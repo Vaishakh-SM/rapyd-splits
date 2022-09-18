@@ -1,4 +1,15 @@
-import { Stack, Heading, VStack, FormControl, FormLabel, Input, HStack, Button, Box, Text } from "@chakra-ui/react";
+import {
+  Stack,
+  Heading,
+  VStack,
+  FormControl,
+  FormLabel,
+  Input,
+  HStack,
+  Button,
+  Box,
+  Text,
+} from "@chakra-ui/react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,18 +30,6 @@ export function CardInput() {
   const onFocusCard = (focus: "name" | "number" | "expiry" | "cvc") => {
     setFocus(focus);
   };
-
-  useEffectOnce(() => {
-    if (params.roomId) {
-      joinRoom(params.roomId!);
-    } else {
-      createRoom();
-      joinRoom(localStorage.getItem("roomId")!);
-    }
-    joinListener(() => {
-      notify();
-    });
-  });
 
   return (
     <Box mx={10}>

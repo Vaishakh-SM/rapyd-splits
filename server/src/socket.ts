@@ -14,25 +14,6 @@ export default function useSocketPath(server: http.Server) {
     },
   });
 
-  // function onCreateRoom(socket: Socket) {
-  //   socket.on("create-room", () => {
-  //     try {
-  //       let roomId = crypto.randomBytes(16).toString("hex").substring(0, 8);
-
-  //       while (roomStore.has(roomId))
-  //         roomId = crypto.randomBytes(16).toString("hex").substring(0, 8);
-
-  //       roomStore.add(roomId);
-
-  //       socket.join(roomId);
-  //       io.to(roomId).emit("create-room-success", roomId);
-  //     } catch (e) {
-  //       console.log("Error while creating room: ", e);
-  //       io.to(socket.id).emit("create-room-fail");
-  //     }
-  //   });
-  // }
-
   function onJoinRoom(socket: Socket) {
     socket.on("join-room", async ({ roomId, name }) => {
       try {
@@ -118,8 +99,6 @@ export default function useSocketPath(server: http.Server) {
 
   io.on("connection", (socket) => {
     console.log(socket.id + " connected ");
-
-    // onCreateRoom(socket);
 
     onJoinRoom(socket);
 
