@@ -12,20 +12,31 @@ import { Dashboard } from "./dashboard";
 import "./config/firebase-config";
 
 import { Room } from "./room/room";
+import { Home, Integrate, Settings } from "./dashboard/routes";
+
+import { QueryClientProvider, QueryClient } from "react-query";
+
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ChakraProvider theme={theme}>
-      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-      <ToastContainer />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/room/:roomId" element={<Room />} />
-          <Route path="/room" element={<Room />} />
-          <Route path="/" element={<Website />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Routes>
-      </BrowserRouter>
-    </ChakraProvider>
+    <QueryClientProvider client={queryClient}>
+      <ChakraProvider theme={theme}>
+        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+        <ToastContainer />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/room/:roomId" element={<Room />} />
+            <Route path="/room" element={<Room />} />
+            <Route path="/" element={<Website />} />
+            <Route path="/dashboard" element={<Dashboard />}>
+              <Route path="home" element={<Home />} />
+			  <Route path="integrate" element={<Integrate />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ChakraProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );

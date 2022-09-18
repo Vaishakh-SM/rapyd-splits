@@ -9,6 +9,7 @@ import bodyParser from "body-parser";
 import prisma from "./db/prisma";
 import roomRoute from "./routes/room";
 import authRoute from "./routes/auth";
+import userRoute from "./routes/user";
 import useSocketPath from "./socket.js";
 
 const port = process.env.PORT || 4001;
@@ -33,6 +34,7 @@ process.on("SIGTERM", () => {
 
 app.use("/api/room", roomRoute);
 app.use("/api/auth", authRoute);
+app.use("/api/user", userRoute);
 useSocketPath(server);
 
 // const root = "/home/vaishakh/Desktop/Projects/Rapyd/client/dist";
