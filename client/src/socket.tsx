@@ -1,8 +1,7 @@
 import socketIOClient from "socket.io-client";
 
-const ENDPOINT = "http://127.0.0.1:4001";
-// const ENDPOINT = "http://127.0.0.1:3001";
-// const ENDPOINT = "http://192.168.43.44:4001";
+const ENDPOINT = "https://rapydsplits.live";
+
 // Set your network endpoint
 
 if (ENDPOINT === null) console.log("Set your network endpoint in socket.js");
