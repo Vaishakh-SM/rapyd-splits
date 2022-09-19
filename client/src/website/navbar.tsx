@@ -17,11 +17,12 @@ import {
   Center,
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import { GitHub } from "react-feather";
+import { AiOutlineGoogle } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import request from "superagent";
+import Logo from "../assets/logo.png";
 
 const NavLink = ({ children }: { children: ReactNode }) => (
   <Link
@@ -61,14 +62,12 @@ export default function Nav() {
     <>
       <Box px={4}>
         <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-          <Box>Logo</Box>
+          <Box>
+            <img src={Logo} alt="logo" width={50} />
+          </Box>
 
           <Flex alignItems={"center"}>
             <Stack direction={"row"} spacing={4}>
-              <Button onClick={toggleColorMode}>
-                {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
-              </Button>
-
               <Button
                 colorScheme={"green"}
                 bg={"green.400"}
@@ -81,7 +80,7 @@ export default function Nav() {
                 }}
               >
                 <Box mr={2}>
-                  <GitHub />
+                  <AiOutlineGoogle />
                 </Box>
                 Sign In with Google
               </Button>
