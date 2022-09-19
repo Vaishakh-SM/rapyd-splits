@@ -38,11 +38,7 @@ router.get("/create", async (req: AuthenticatedRequest, res) => {
 
     // FOR TESTING
 
-    res.redirect(
-      process.env.NODE_ENV === "development"
-        ? `http://localhost:5173/room/${room.id}`
-        : `/room/${room.id}`
-    );
+    res.redirect(`/room/${room.id}`);
   } catch (e) {
     console.log("Errored during room creation: ", e);
     res.send(e);

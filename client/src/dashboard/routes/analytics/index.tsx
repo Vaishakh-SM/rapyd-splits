@@ -26,7 +26,7 @@ type Series = {
 export function Analytics() {
   const { data, isLoading, error } = useQuery("analyticsData", () => {
     return request
-      .get("http://localhost:4001/api/analytics/data")
+      .get("/api/analytics/data")
       .set("Authorization", "Bearer " + window.localStorage.getItem("token"));
   });
 

@@ -3,7 +3,7 @@ import * as crypto from "crypto";
 
 export const IS_PUBLIC_KEY = "isPublic";
 export const CLIENT_URL =
-  process.env.NODE_ENV === "production" ? "" : "http://localhost:5173";
+  process.env.NODE_ENV === "production" ? "https://rapydsplits.live" : "http://localhost:5173";
 
 const accessKey = process.env.RAPYD_ACCESS;
 const secretKey = process.env.RAPYD_SECRET;

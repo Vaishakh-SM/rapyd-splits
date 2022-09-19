@@ -24,7 +24,7 @@ import ClipboardJS from "clipboard";
 
 export function Integrate() {
   const { isLoading, data, error } = useQuery("ewalletIds", async () => {
-    return request.get("http://localhost:4001/api/user/ewallets").set({
+    return request.get("/api/user/ewallets").set({
       Authorization: "Bearer " + window.localStorage.getItem("token"),
     });
   });
@@ -102,7 +102,7 @@ export function Integrate() {
             <Text>Select a EWallet ID to continue</Text>
           ) : (
             <>
-              <Code p={3} borderRadius={5} id="clipboard-data" as={"input"} readOnly value={`http://localhost:4001/api/room/create?ewallet=${selected}&amount={"{???}"}&userId=${firebase.auth().currentUser?.uid}`} />
+              <Code p={3} borderRadius={5} id="clipboard-data" as={"input"} readOnly value={`/api/room/create?ewallet=${selected}&amount={"{???}"}&userId=${firebase.auth().currentUser?.uid}`} />
               <Button className="cpy-btn" data-clipboard-target="#clipboard-data" onClick={() => {
 				console.log(document.getElementById("clipboard-data"));
 			  }}>Copy</Button>

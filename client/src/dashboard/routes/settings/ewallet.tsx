@@ -34,7 +34,7 @@ import request, {ResponseError} from "superagent";
 
 function EWalletsContainer({ onClickAdd }: { onClickAdd: () => void }) {
   const { isLoading, data, error } = useQuery("ewalletIds", async () => {
-    return request.get("http://localhost:4001/api/user/ewallets").set({
+    return request.get("/api/user/ewallets").set({
       Authorization: "Bearer " + window.localStorage.getItem("token"),
     });
   });
@@ -44,7 +44,7 @@ function EWalletsContainer({ onClickAdd }: { onClickAdd: () => void }) {
   const removeEWalletMutation = useMutation(
     (eWalletId: string) => {
       return request
-        .delete("http://localhost:4001/api/user/ewallet")
+        .delete("/api/user/ewallet")
         .set({
           Authorization: "Bearer " + window.localStorage.getItem("token"),
         })
@@ -119,7 +119,7 @@ export function EWallets() {
   const addEWalletMutation = useMutation(
     (eWalletId: string) => {
       return request
-        .post("http://localhost:4001/api/user/ewallet")
+        .post("/api/user/ewallet")
         .set({
           Authorization: "Bearer " + window.localStorage.getItem("token"),
         })

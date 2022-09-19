@@ -17,7 +17,7 @@ const port = process.env.PORT || 4001;
 
 const app = express();
 app.use(
-  cors({ origin: "http://localhost:5173", credentials: true, methods: ["*"] })
+  cors({ origin: "https://rapydsplits.live", credentials: true, methods: ["*"] })
 );
 
 app.use(bodyParser.json());

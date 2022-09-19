@@ -22,7 +22,7 @@ export function Dashboard() {
             window.localStorage.setItem("token", token);
           });
           request
-            .get("http://localhost:4001/api/auth/signin")
+            .get("/api/auth/signin")
             .set({
               Authorization: "Bearer " + window.localStorage.getItem("token"),
             })
@@ -38,7 +38,7 @@ export function Dashboard() {
       });
     } else if (firebase.auth().currentUser !== null) {
       request
-        .get("http://localhost:4001/api/auth/signin")
+        .get("/api/auth/signin")
         .set({
           Authorization: "Bearer " + window.localStorage.getItem("token"),
         })

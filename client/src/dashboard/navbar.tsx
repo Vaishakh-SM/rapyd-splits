@@ -69,14 +69,6 @@ export default function SidebarWithHeader({
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const currentUser = firebase.auth().currentUser;
-  //   useEffectOnce(() => {
-  //     request
-  //       .get("http://localhost:4001/users")
-  //       .set({ Authorization: "Bearer " + window.localStorage.getItem("token") })
-  //       .then((res) => {
-  //         console.log(res);
-  //       });
-  //   });
   return (
     <Box minH="100vh" bg={useColorModeValue("gray.100", "gray.900")}>
       <SidebarContent

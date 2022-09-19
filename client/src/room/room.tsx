@@ -79,7 +79,7 @@ export function Room() {
     ["roomAmount", params.roomId],
     () => {
       return request
-        .get(`http://localhost:4001/api/room/${params.roomId}`)
+        .get(`/api/room/${params.roomId}`)
         .set({
           Authorization: "Bearer " + window.localStorage.getItem("token"),
         });
