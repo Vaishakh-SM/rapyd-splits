@@ -17,6 +17,7 @@ import { Home, Integrate, Settings } from "./dashboard/routes";
 import { QueryClientProvider, QueryClient } from "react-query";
 import { Success } from "./room/success";
 import { Failure } from "./room/failure";
+import { Analytics } from "./dashboard/routes/analytics";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
               <Route path="home" element={<Home />} />
               <Route path="integrate" element={<Integrate />} />
               <Route path="settings" element={<Settings />} />
+			  <Route path="analytics" element={<Analytics />} />
             </Route>
             <Route path="/success" element={<Success />} />
             <Route path="/failure" element={<Failure />} />

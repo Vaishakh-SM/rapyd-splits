@@ -22,6 +22,13 @@ import {
   MenuItem,
   MenuList,
   Button,
+  Popover,
+  PopoverTrigger,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverHeader,
 } from "@chakra-ui/react";
 import {
   FiHome,
@@ -39,6 +46,7 @@ import { useEffectOnce } from "../utils/useEffectOnce";
 import request from "superagent";
 import firebase from "firebase/compat/app";
 import { Link as ReactRouterLink } from "react-router-dom";
+import Logo from "../assets/logo.png";
 
 interface LinkItemProps {
   name: string;
@@ -48,8 +56,7 @@ interface LinkItemProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: "Home", icon: FiHome, link: "home" },
   { name: "Integrate", icon: FiTrendingUp, link: "integrate" },
-  { name: "Explore", icon: FiCompass, link: "home" },
-  { name: "Favourites", icon: FiStar, link: "home" },
+  { name: "Analytics", icon: FiCompass, link: "analytics" },
   { name: "Settings", icon: FiSettings, link: "settings" },
 ];
 
@@ -119,11 +126,9 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       {...rest}
     >
       <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <Button variant={"ghost"} as={ReactRouterLink} to="/dashboard">
-			<Text fontSize="2xl" fontFamily="monospace" fontWeight="bold">
-			  Logo
-			</Text>
-		</Button>
+        <IconButton variant={"ghost"} as={ReactRouterLink} to="/dashboard" aria-label="logo-button">
+          <img src={Logo} alt="logo" width="50px" />
+        </IconButton>
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
@@ -213,12 +218,24 @@ const MobileNav = ({ onOpen, profile, setLoading, ...rest }: MobileProps) => {
       </Text>
 
       <HStack spacing={{ base: "0", md: "6" }}>
-        <IconButton
-          size="lg"
-          variant="ghost"
-          aria-label="open menu"
-          icon={<FiBell />}
-        />
+        <Popover>
+          <PopoverTrigger>
+            <IconButton
+              size="lg"
+              variant="ghost"
+              aria-label="open menu"
+              icon={<FiBell />}
+            />
+          </PopoverTrigger>
+          <PopoverContent>
+            <PopoverArrow />
+            <PopoverCloseButton />
+            <PopoverHeader>Notifications</PopoverHeader>
+            <PopoverBody>
+              <Text color="gray.500">No Notifications for now!</Text>
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
         <Flex alignItems={"center"}>
           <Menu>
             <MenuButton
@@ -252,9 +269,9 @@ const MobileNav = ({ onOpen, profile, setLoading, ...rest }: MobileProps) => {
               bg={useColorModeValue("white", "gray.900")}
               borderColor={useColorModeValue("gray.200", "gray.700")}
             >
-              <MenuItem>Profile</MenuItem>
-              <MenuItem>Settings</MenuItem>
-              <MenuItem>Billing</MenuItem>
+              <MenuItem as={ReactRouterLink} to={"settings"}>
+                Settings
+              </MenuItem>
               <MenuDivider />
               <MenuItem
                 onClick={async () => {
