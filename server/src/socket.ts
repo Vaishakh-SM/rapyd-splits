@@ -269,6 +269,4 @@ export default function useSocketPath(server: http.Server) {
     onPay(socket);
     onConfirmed(socket);
   });
-
-  server.
 }
