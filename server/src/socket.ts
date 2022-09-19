@@ -117,6 +117,7 @@ export default function useSocketPath(server: http.Server) {
     socket.on("pay", async () => {
       if (userRoom.has(socket.id)) {
         let roomId = userRoom.get(socket.id);
+        io.to(roomId).emit("payment-redirect-start");
 
         const room = await prisma.room.findUnique({
           where: { id: roomId },
@@ -163,8 +164,8 @@ export default function useSocketPath(server: http.Server) {
                 payment_method_options: {
                   "3d_required": true,
                 },
-                error_payment_url: "https://error.example.net",
-                complete_payment_url: "https://complete.example.net",
+                error_payment_url: "https://rapydsplits.live/failure",
+                complete_payment_url: "https://rapydsplits.live/success",
                 metadata: {
                   socket_id: key,
                 },
@@ -218,7 +219,7 @@ export default function useSocketPath(server: http.Server) {
             //     console.log(err);
             //   });
             console.log("Sending req!");
-            console.log(reqBody);
+            console.log(JSON.stringify(reqBody, null, 4));
             try {
               const {
                 body: { data },
@@ -230,10 +231,13 @@ export default function useSocketPath(server: http.Server) {
               console.log(JSON.stringify(data, null, 4));
 
               data["payments"].forEach((payment: any) => {
-                io.to(payment["metadata"]["socket_id"]).emit("payment-redirect", {
-                  message: "Done",
-				  redirect_url: payment["redirect_url"],
-                });
+                io.to(payment["metadata"]["socket_id"]).emit(
+                  "payment-redirect",
+                  {
+                    message: "Done",
+                    redirect_url: payment["redirect_url"],
+                  }
+                );
               });
             } catch (e) {
               console.log(e);

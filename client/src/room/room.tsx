@@ -35,14 +35,18 @@ import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
 import { ScaleLoader } from "react-spinners";
 import request from "superagent";
-import { chooseAmount, joinRoom, pay, redirectListener } from "../socket";
+import {
+  chooseAmount,
+  joinRoom,
+  loadingListener,
+  pay,
+  redirectListener,
+} from "../socket";
 import { updateListener } from "../socket";
 import { CardInput } from "./components/CardInput";
 
 export function Room() {
   const params = useParams();
-  const currency = "USD";
-  const totalAmount = 100;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [room, setRoom] = useState<
     { nickname: string; amount: number; ready: boolean }[]
@@ -50,6 +54,7 @@ export function Room() {
   const [amount, setAmount] = useState("");
   const [amountSelected, setAmountSelected] = useState(false);
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
   const handleInputChange = (e: any) => {
     setName(e.target.value);
   };
@@ -64,7 +69,10 @@ export function Room() {
       setRoom(roomState);
     });
     onOpen();
-	redirectListener()
+    redirectListener();
+    loadingListener(() => {
+      setLoading(true);
+    });
   }, []);
 
   const { data, error, isLoading } = useQuery(
@@ -83,6 +91,17 @@ export function Room() {
     onOpen: drawerOnOpen,
     onClose: drawerOnClose,
   } = useDisclosure();
+
+  if (loading) {
+    return (
+      <Center height="100vh">
+        <VStack>
+          <ScaleLoader />
+          <Text>Please wait while we redirect you...</Text>
+        </VStack>
+      </Center>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -165,7 +184,7 @@ export function Room() {
           mt={6}
           mb={4}
         >
-          Total Amount: ${data?.body?.amount.toString()}
+          Total Amount: INR{data?.body?.amount.toString()}
         </Text>
 
         <Text
@@ -175,7 +194,7 @@ export function Room() {
           alignSelf="start"
           mb={4}
         >
-          Amount Remaining: $
+          Amount Remaining: INR
           {data?.body?.amount -
             room.reduce((acc, curr) => acc + curr.amount, 0)}
         </Text>
@@ -210,7 +229,7 @@ export function Room() {
             data?.body?.amount -
               room.reduce((acc, curr) => acc + curr.amount, 0) !==
               0 ||
-            !(room.reduce((acc, curr) => acc && curr.ready, true)) ||
+            !room.reduce((acc, curr) => acc && curr.ready, true) ||
             room.length < 2
           }
           width="100%"
@@ -228,7 +247,7 @@ export function Room() {
         {room.map(
           (user: any) =>
             user.nickname !== localStorage.getItem("nickname") && (
-              <UserCard user={user} currency={currency} />
+              <UserCard user={user} currency={"INR"} />
             )
         )}
       </VStack>

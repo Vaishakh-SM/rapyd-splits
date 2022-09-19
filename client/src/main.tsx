@@ -15,6 +15,8 @@ import { Room } from "./room/room";
 import { Home, Integrate, Settings } from "./dashboard/routes";
 
 import { QueryClientProvider, QueryClient } from "react-query";
+import { Success } from "./room/success";
+import { Failure } from "./room/failure";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,8 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
               <Route path="integrate" element={<Integrate />} />
               <Route path="settings" element={<Settings />} />
             </Route>
+            <Route path="/success" element={<Success />} />
+            <Route path="/failure" element={<Failure />} />
           </Routes>
         </BrowserRouter>
       </ChakraProvider>
