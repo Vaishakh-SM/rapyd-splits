@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import request from "superagent";
+import Logo from "../assets/logo.png";
 
 const NavLink = ({ children }: { children: ReactNode }) => (
   <Link
@@ -50,8 +51,7 @@ export default function Nav() {
 
         userCred.getIdToken().then((token) => {
           window.localStorage.setItem("token", token);
-		  navigate("/dashboard/home");
-        
+          navigate("/dashboard/home");
         });
       }
     });
@@ -61,7 +61,9 @@ export default function Nav() {
     <>
       <Box px={4}>
         <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-          <Box>Logo</Box>
+          <Box>
+            <img src={Logo} alt="logo" width={50}/>
+          </Box>
 
           <Flex alignItems={"center"}>
             <Stack direction={"row"} spacing={4}>
@@ -77,7 +79,6 @@ export default function Nav() {
                   const creds = await firebase
                     .auth()
                     .signInWithPopup(new firebase.auth.GoogleAuthProvider());
-                  
                 }}
               >
                 <Box mr={2}>
