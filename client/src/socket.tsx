@@ -27,8 +27,9 @@ export function joinRoom(roomId: string, name: string) {
   console.log("Emmiting for room id ", roomId);
   socket.emit("join-room", { roomId: roomId, name: name });
 
-  socket.once("join-room-success", (roomId: string) => {
+  socket.once("join-room-success", (roomId: string, nickname: string) => {
     localStorage.setItem("roomId", roomId);
+    localStorage.setItem("nickname", nickname);
     console.log("JOINED:", roomId);
 
     // setRoomId(socket.roomId);
@@ -36,12 +37,30 @@ export function joinRoom(roomId: string, name: string) {
   });
 }
 
-export function joinListener(ev?: () => void) {
-  socket.on("new-join", (roomId: string) => {
-    console.log("Someone joined the room", roomId);
-    if (ev) {
-      ev();
-    }
+export function chooseAmount(
+  amount: number,
+  cardNumber: string,
+  expiration_month: string,
+  expiration_year: string,
+  cardCvc: string,
+  cardName: string
+) {
+  socket.emit(
+    "choose-amount",
+    amount,
+    cardNumber,
+    expiration_month,
+    expiration_year,
+    cardCvc,
+    cardName
+  );
+}
+
+export function pay() {
+  socket.emit("pay");
+
+  socket.once("payment-status", (message) => {
+    console.log(message);
   });
 }
 

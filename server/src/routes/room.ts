@@ -59,7 +59,7 @@ router.get("/room/:roomid", async (req: AuthenticatedRequest, res) => {
   }
 
   res.send({
-	amound: room.amount,
+    amount: room.amount,
   });
 });
 

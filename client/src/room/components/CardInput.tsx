@@ -13,7 +13,7 @@ import {
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { joinRoom, createRoom, joinListener } from "../../socket";
+import { joinRoom, createRoom } from "../../socket";
 import { useEffectOnce } from "../../utils/useEffectOnce";
 import Card from "react-credit-cards-2";
 
@@ -43,14 +43,7 @@ export function CardInput({
   return (
     <Box mx={10}>
       {/* <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}> */}
-      <Stack align={"center"} my={5}>
-        <Heading fontSize={"4xl"} textAlign={"center"}>
-          Group Payment
-        </Heading>
-        <Text fontSize={"lg"} color={"gray.600"}>
-          What's love if not sharing bills
-        </Text>
-      </Stack>
+
       <Card
         cvc={cardCvc}
         expiry={cardExpiry}
@@ -149,7 +142,7 @@ export function CardInput({
             callback(cardNumber, cardName, cardExpiry, cardCvc);
           }}
         >
-          Add
+          Pay
         </Button>
       </VStack>
       {/* <div className="card">

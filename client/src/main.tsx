@@ -10,7 +10,7 @@ import { Website } from "./website";
 import theme from "./utils/theme";
 import { Dashboard } from "./dashboard";
 import "./config/firebase-config";
-
+import "react-credit-cards/es/styles-compiled.css";
 import { Room } from "./room/room";
 import { Home, Integrate, Settings } from "./dashboard/routes";
 
@@ -31,7 +31,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             <Route path="/" element={<Website />} />
             <Route path="/dashboard" element={<Dashboard />}>
               <Route path="home" element={<Home />} />
-			  <Route path="integrate" element={<Integrate />} />
+              <Route path="integrate" element={<Integrate />} />
               <Route path="settings" element={<Settings />} />
             </Route>
           </Routes>

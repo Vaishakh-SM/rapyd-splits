@@ -1,12 +1,20 @@
+import { CheckIcon } from "@chakra-ui/icons";
 import {
   Avatar,
   Box,
   Button,
+  Drawer,
+  DrawerBody,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
   FormControl,
   FormLabel,
   Heading,
   HStack,
   Input,
+  InputGroup,
+  InputRightElement,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -21,47 +29,30 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { CheckCircle, DollarSign } from "react-feather";
+import { CheckCircle } from "react-feather";
 import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
 import request from "superagent";
-import { joinRoom } from "../socket";
+import { chooseAmount, joinRoom, pay } from "../socket";
 import { updateListener } from "../socket";
 import { CardInput } from "./components/CardInput";
-
-// const res = {
-//   total: 100,
-//   currency: "USD",
-//   users: [
-//     {
-//       nickname: "CrazyFrog",
-//       amount: 40,
-//       ready: true,
-//     },
-//     {
-//       nickname: "IntelligentBuffalo",
-//       amount: 40,
-//       ready: false,
-//     },
-//     {
-//       nickname: "YourMom",
-//       ready: false,
-//     },
-//   ],
-// };
-// Make interface/type for this above thing?
 
 export function Room() {
   const params = useParams();
   const currency = "USD";
-  const amount = 100;
+  const totalAmount = 100;
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [room, setRoom] = useState([]);
-
+  const [amount, setAmount] = useState("");
+  const [amountSelected, setAmountSelected] = useState(false);
   const [name, setName] = useState("");
-
   const handleInputChange = (e: any) => {
     setName(e.target.value);
+  };
+
+  const handleAmountChange = (e: any) => {
+    setAmount(e.target.value);
+    setAmountSelected(false);
   };
 
   useEffect(() => {
@@ -82,9 +73,15 @@ export function Room() {
     }
   );
 
+  const {
+    isOpen: drawerIsOpen,
+    onOpen: drawerOnOpen,
+    onClose: drawerOnClose,
+  } = useDisclosure();
+
   return (
     <Box m={10}>
-      <CardInput callback={(cardNumber, cardName, cardExpiry, cardCvc) => {}} />
+      {/* <CardInput callback={(cardNumber, cardName, cardExpiry, cardCvc) => {}} /> */}
       <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
         <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
         <ModalContent>
@@ -107,6 +104,7 @@ export function Room() {
                   alert("Name should not be empty");
                 } else {
                   joinRoom(params.roomId as string, name);
+
                   onClose();
                 }
               }}
@@ -114,14 +112,9 @@ export function Room() {
               Submit
             </Button>
           </ModalBody>
-
-          {/* <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Save
-            </Button>
-          </ModalFooter> */}
         </ModalContent>
       </Modal>
+
       <Stack align={"center"} my={5}>
         <Heading fontSize={"4xl"} textAlign={"center"}>
           Group Payment
@@ -129,16 +122,84 @@ export function Room() {
         <Text fontSize={"lg"} color={"gray.600"}>
           What's love if not sharing bills
         </Text>
+        <InputGroup>
+          <Input
+            value={amount}
+            onChange={handleAmountChange}
+            placeholder="Amount"
+            size="lg"
+          />
+          {amountSelected && (
+            <InputRightElement children={<CheckIcon color="green.500" />} />
+          )}
+        </InputGroup>
       </Stack>
       <VStack>
-        {room.map((user) => (
-          <UserCard user={user} currency={currency} />
-        ))}
-
-        <Button width="100%" colorScheme={"green"}>
-          Initate Payment
+        <Button
+          width="100%"
+          colorScheme={"green"}
+          onClick={() => {
+            if (amount) {
+              drawerOnOpen();
+            } else {
+              alert("Choose an amount");
+            }
+          }}
+        >
+          Pay your share
         </Button>
+        <Button
+          width="100%"
+          colorScheme={"cyan"}
+          onClick={() => {
+            pay();
+          }}
+        >
+          Pay as group
+        </Button>
+        {/* {firstCard && (
+          <UserCard user={firstCard} currency={currency} key={firstCard} />
+        )} */}
+
+        {room.map(
+          (user: any) =>
+            user.nickname !== localStorage.getItem("nickname") && (
+              <UserCard user={user} currency={currency} />
+            )
+        )}
       </VStack>
+
+      <Drawer
+        placement={"bottom"}
+        onClose={drawerOnClose}
+        isOpen={drawerIsOpen}
+      >
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerHeader borderBottomWidth="1px">Basic Drawer</DrawerHeader>
+          <DrawerBody>
+            <CardInput
+              callback={(cardNumber, cardName, cardExpiry, cardCvc) => {
+                if (amount && cardNumber && cardName && cardExpiry && cardCvc) {
+                  chooseAmount(
+                    Number(amount),
+                    cardNumber,
+                    cardExpiry.slice(0, 2),
+                    cardExpiry.slice(3, 5),
+                    cardCvc,
+                    cardName
+                  );
+
+                  setAmountSelected(true);
+                  drawerOnClose();
+                } else {
+                  alert("Fill all fields");
+                }
+              }}
+            />
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </Box>
   );
 }

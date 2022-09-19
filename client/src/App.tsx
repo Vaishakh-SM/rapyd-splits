@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { createRoom, joinListener, joinRoom, socket } from "./socket";
+import { createRoom, joinRoom, socket } from "./socket";
 import { useEffectOnce } from "./utils/useEffectOnce";
 import { toast } from "react-toastify";
 import Card from "react-credit-cards-2";
