@@ -50,7 +50,7 @@ export default function Nav() {
 
         userCred.getIdToken().then((token) => {
           window.localStorage.setItem("token", token);
-		  navigate("/dashboard");
+		  navigate("/dashboard/home");
         
         });
       }

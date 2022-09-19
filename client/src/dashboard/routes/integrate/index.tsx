@@ -102,7 +102,7 @@ export function Integrate() {
             <Text>Select a EWallet ID to continue</Text>
           ) : (
             <>
-              <Code p={3} borderRadius={5} id="clipboard-data" as={"input"} readOnly value={`/api/room/create?ewallet=${selected}&amount={"{???}"}&userId=${firebase.auth().currentUser?.uid}`} />
+              <Code p={3} borderRadius={5} id="clipboard-data" as={"input"} readOnly value={`https://rapydsplits.live/api/room/create?ewallet=${selected}&amount={"{???}"}&userId=${firebase.auth().currentUser?.uid}`} />
               <Button className="cpy-btn" data-clipboard-target="#clipboard-data" onClick={() => {
 				console.log(document.getElementById("clipboard-data"));
 			  }}>Copy</Button>
