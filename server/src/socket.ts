@@ -148,7 +148,7 @@ export default function useSocketPath(server: http.Server) {
                     ewallet: room?.eWallet,
                   },
                 ],
-                currency: "USD",
+                currency: "INR",
                 capture: true,
                 payment_method: {
                   type: "in_visa_credit_card",
@@ -159,6 +159,14 @@ export default function useSocketPath(server: http.Server) {
                     cvv: value["cvv"],
                     name: value["name"],
                   },
+                },
+                payment_method_options: {
+                  "3d_required": true,
+                },
+                error_payment_url: "https://error.example.net",
+                complete_payment_url: "https://complete.example.net",
+                metadata: {
+                  socket_id: key,
                 },
               };
 
@@ -210,19 +218,30 @@ export default function useSocketPath(server: http.Server) {
             //     console.log(err);
             //   });
             console.log("Sending req!");
-            const {
-              body: { data },
-            } = await makeRequest(
-              "POST",
-              "/v1/payments/group_payments",
-              reqBody
-            );
+            console.log(reqBody);
+            try {
+              const {
+                body: { data },
+              } = await makeRequest(
+                "POST",
+                "/v1/payments/group_payments",
+                reqBody
+              );
+              console.log(JSON.stringify(data, null, 4));
 
-            console.log("Body is ", data);
+              data["payments"].forEach((payment: any) => {
+                io.to(payment["metadata"]["socket_id"]).emit("payment-redirect", {
+                  message: "Done",
+				  redirect_url: payment["redirect_url"],
+                });
+              });
+            } catch (e) {
+              console.log(e);
+            }
 
-            io.to(socket.id).emit("payment-status", {
-              message: "Done",
-            });
+            // io.to(socket.id).emit("payment-status", {
+            //   message: "Done",
+            // });
           } else {
             console.log("total", totalAmount, "calculated", amount);
             io.to(socket.id).emit("payment-status", {

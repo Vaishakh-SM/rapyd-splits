@@ -35,7 +35,7 @@ import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
 import { ScaleLoader } from "react-spinners";
 import request from "superagent";
-import { chooseAmount, joinRoom, pay } from "../socket";
+import { chooseAmount, joinRoom, pay, redirectListener } from "../socket";
 import { updateListener } from "../socket";
 import { CardInput } from "./components/CardInput";
 
@@ -64,6 +64,7 @@ export function Room() {
       setRoom(roomState);
     });
     onOpen();
+	redirectListener()
   }, []);
 
   const { data, error, isLoading } = useQuery(

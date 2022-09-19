@@ -93,12 +93,13 @@ async function httpRequest(options: any, body: any): Promise<any> {
             // return reject(new HttpException(message, status));
             console.log("message: ", message);
             console.log("Status ", status);
-            return reject();
+            return reject(response);
           }
           return resolve(response);
         });
       });
       req.on("error", (error) => {
+		console.log(error)
         return reject(error);
       });
       req.write(bodyString);

@@ -64,6 +64,13 @@ export function pay() {
   });
 }
 
+export function redirectListener() {
+	socket.on("payment-redirect", ({redirect_url, message}) => {
+		console.log("Redirecting to: ", redirect_url);
+		window.location.href = redirect_url;
+	})
+}
+
 export function updateListener(setRoom: (roomState: any) => void) {
   socket.on("update-room", (roomState) => {
     let roomStateUpdate = [];
