@@ -3,3 +3,4 @@
 *.husky
 serviceAccountKey.json
 server/dist
+client/dist
