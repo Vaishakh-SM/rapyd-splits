@@ -3,6 +3,7 @@ import {
   Avatar,
   Box,
   Button,
+  Center,
   Drawer,
   DrawerBody,
   DrawerContent,
@@ -32,6 +33,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle } from "react-feather";
 import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
+import { ScaleLoader } from "react-spinners";
 import request from "superagent";
 import { chooseAmount, joinRoom, pay } from "../socket";
 import { updateListener } from "../socket";
@@ -42,7 +44,9 @@ export function Room() {
   const currency = "USD";
   const totalAmount = 100;
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [room, setRoom] = useState([]);
+  const [room, setRoom] = useState<
+    { nickname: string; amount: number; ready: boolean }[]
+  >([]);
   const [amount, setAmount] = useState("");
   const [amountSelected, setAmountSelected] = useState(false);
   const [name, setName] = useState("");
@@ -79,6 +83,28 @@ export function Room() {
     onClose: drawerOnClose,
   } = useDisclosure();
 
+  if (isLoading) {
+    return (
+      <Center height={"100vh"}>
+        <ScaleLoader />
+      </Center>
+    );
+  }
+
+  if (error) {
+    return (
+      <Center>
+        <Text>{error.toString()}</Text>
+      </Center>
+    );
+  }
+
+  console.log(
+    data?.body?.amount - room.reduce((acc, curr) => acc + curr.amount, 0) !== 0,
+    room.reduce((acc, curr) => acc && curr.ready, true),
+    room.length < 2
+  );
+
   return (
     <Box m={10}>
       {/* <CardInput callback={(cardNumber, cardName, cardExpiry, cardCvc) => {}} /> */}
@@ -99,7 +125,6 @@ export function Room() {
               mt={4}
               colorScheme="teal"
               onClick={() => {
-                console.log("Lmao");
                 if (name == "") {
                   alert("Name should not be empty");
                 } else {
@@ -121,6 +146,37 @@ export function Room() {
         </Heading>
         <Text fontSize={"lg"} color={"gray.600"}>
           What's love if not sharing bills
+        </Text>
+        <Text
+          fontSize={"lg"}
+          color={"green"}
+          fontWeight={"bold"}
+          alignSelf="start"
+          mt={6}
+        >
+          Nickname: {localStorage.getItem("nickname")}
+        </Text>
+        <Text
+          fontSize={"lg"}
+          color={"green"}
+          fontWeight={"bold"}
+          alignSelf="start"
+          mt={6}
+          mb={4}
+        >
+          Total Amount: ${data?.body?.amount.toString()}
+        </Text>
+
+        <Text
+          fontSize={"lg"}
+          color={"green"}
+          fontWeight={"bold"}
+          alignSelf="start"
+          mb={4}
+        >
+          Amount Remaining: $
+          {data?.body?.amount -
+            room.reduce((acc, curr) => acc + curr.amount, 0)}
         </Text>
         <InputGroup>
           <Input
@@ -149,6 +205,13 @@ export function Room() {
           Pay your share
         </Button>
         <Button
+          isDisabled={
+            data?.body?.amount -
+              room.reduce((acc, curr) => acc + curr.amount, 0) !==
+              0 ||
+            !(room.reduce((acc, curr) => acc && curr.ready, true)) ||
+            room.length < 2
+          }
           width="100%"
           colorScheme={"cyan"}
           onClick={() => {
@@ -176,7 +239,7 @@ export function Room() {
       >
         <DrawerOverlay />
         <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">Basic Drawer</DrawerHeader>
+          <DrawerHeader borderBottomWidth="1px">Payment Info</DrawerHeader>
           <DrawerBody>
             <CardInput
               callback={(cardNumber, cardName, cardExpiry, cardCvc) => {

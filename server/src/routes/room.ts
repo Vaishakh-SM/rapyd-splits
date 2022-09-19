@@ -49,7 +49,7 @@ router.get("/create", async (req: AuthenticatedRequest, res) => {
   }
 });
 
-router.get("/room/:roomid", async (req: AuthenticatedRequest, res) => {
+router.get("/:roomid", async (req: AuthenticatedRequest, res) => {
   const room = await prisma.room.findUnique({
     where: { id: req.params.roomid },
   });

@@ -75,6 +75,7 @@ export default function useSocketPath(server: http.Server) {
 
           if (roomState !== undefined) {
             roomState[socket.id]["amount"] = amount;
+            roomState[socket.id]["ready"] = true;
             roomStore.set(roomId, roomState);
           } else {
             console.log("Error! Roomstate undefined in amount chosen");
@@ -142,7 +143,12 @@ export default function useSocketPath(server: http.Server) {
               // Check is amount is an integer
               let obj = {
                 amount: Number(value["amount"]),
-                currency: "INR",
+                ewallets: [
+                  {
+                    ewallet: room?.eWallet,
+                  },
+                ],
+                currency: "USD",
                 capture: true,
                 payment_method: {
                   type: "in_visa_credit_card",
@@ -156,7 +162,6 @@ export default function useSocketPath(server: http.Server) {
                 },
               };
 
-              reqBody["payments"].push(obj);
               reqBody["payments"].push(obj);
             });
 
@@ -264,4 +269,6 @@ export default function useSocketPath(server: http.Server) {
     onPay(socket);
     onConfirmed(socket);
   });
+
+  server.
 }
