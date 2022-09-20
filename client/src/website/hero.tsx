@@ -11,6 +11,7 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
+import firebase from "firebase/compat/app";
 
 export default function Hero() {
   return (
@@ -56,7 +57,9 @@ export default function Hero() {
             >
               Get Started
             </Button>
-            <Button variant={"link"} colorScheme={"blue"} size={"sm"}>
+            <Button variant={"link"} colorScheme={"blue"} size={"sm"} onClick={() => {
+				firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());
+			}}>
               Log In
             </Button>
           </Stack>
