@@ -10,7 +10,6 @@ import {
   createIcon,
   useColorMode,
 } from "@chakra-ui/react";
-import firebase from "firebase/compat/app";
 import { Link } from "react-router-dom";
 import firebase from "firebase/compat/app";
 
