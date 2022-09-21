@@ -69,6 +69,9 @@ The `prisma` folder contains all out database models and the `src` folder contai
 The `index.ts` file has all the routers and middlewares setup (which come from the `/middleware` folder). Custom types are defined in `/types` folder
 and all the api routes reside in the `routes` folder. The socket server (upon which the rooms functionality work) is also setup in this file and the rest happens in the `socket.ts` file.
 
+## Sample integration
+
+Check out [rapyd-demo](https://github.com/Muhammedsinanck/rapyd-demo) to see how one can go about integrating the group payment feature into their app.
 
 
 
